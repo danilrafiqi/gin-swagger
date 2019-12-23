@@ -17,7 +17,6 @@ type Config struct {
 	User           map[string]string
 	Url            string
 	Urls           []Urls
-	Docs           string
 	Authentication bool
 }
 
