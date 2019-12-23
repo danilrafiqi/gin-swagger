@@ -26,10 +26,11 @@ type Urls struct {
 }
 
 type swaggerUIBundle struct {
-	URL         string
-	URLS        interface{}
-	DeepLinking bool
-	SwaggerUrl  string
+	URL            string
+	URLS           interface{}
+	Authentication bool
+	DeepLinking    bool
+	SwaggerUrl     string
 }
 
 func authenticate(conf Config) gin.HandlerFunc {
@@ -91,11 +92,16 @@ func index(conf Config) gin.HandlerFunc {
 		var indexPath = path.Join("swagger/views", "index.html")
 		var index, _ = template.ParseFiles(indexPath)
 		var jsonData, _ = json.Marshal(conf.Urls)
-		fmt.Println(string(jsonData))
-		index.Execute(c.Writer, swaggerUIBundle{
-			URL:  conf.Url + "/docs/swagger.json",
-			URLS: string(jsonData),
-		})
+		if len(conf.Urls) > 0 {
+			index.Execute(c.Writer, swaggerUIBundle{
+				URLS:           string(jsonData),
+				Authentication: conf.Authentication,
+			})
+		} else {
+			index.Execute(c.Writer, swaggerUIBundle{
+				URL: conf.Url + "/docs/swagger.json",
+			})
+		}
 	}
 }
 
