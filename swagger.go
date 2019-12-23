@@ -50,7 +50,7 @@ func authenticate(conf Config) gin.HandlerFunc {
 
 func login(conf Config) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var loginPath = path.Join("views", "login.html")
+		var loginPath = path.Join("swagger/views", "login.html")
 		var login, _ = template.ParseFiles(loginPath)
 		login.Execute(c.Writer, swaggerUIBundle{
 			URL: conf.Url,
@@ -89,12 +89,12 @@ func logout(conf Config) gin.HandlerFunc {
 
 func index(conf Config) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var indexPath = path.Join("views", "index.html")
+		var indexPath = path.Join("swagger/views", "index.html")
 		var index, _ = template.ParseFiles(indexPath)
 		var jsonData, _ = json.Marshal(conf.Urls)
 		fmt.Println(string(jsonData))
 		index.Execute(c.Writer, swaggerUIBundle{
-			URL:  conf.Url + conf.Docs,
+			URL:  conf.Url + "/docs/swagger.json",
 			URLS: string(jsonData),
 		})
 	}
@@ -102,8 +102,8 @@ func index(conf Config) gin.HandlerFunc {
 
 func Init(config Config) {
 	var store = cookie.NewStore([]byte("secret"))
-	config.Route.Static("/assets", "./assets")
-	config.Route.StaticFile(config.Docs, "."+config.Docs)
+	config.Route.Static("/assets", "./swagger/assets")
+	config.Route.Static("/docs", "./swagger/docs/")
 	config.Route.Use(sessions.Sessions("mysession", store))
 	config.Route.GET("/login", login(config))
 	config.Route.POST("/login", loginProccess(config))
