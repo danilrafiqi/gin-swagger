@@ -99,7 +99,8 @@ func index(conf Config) gin.HandlerFunc {
 			})
 		} else {
 			index.Execute(c.Writer, swaggerUIBundle{
-				URL: conf.Url + "/docs/swagger.json",
+				URL:            conf.Url + "/docs/swagger.json",
+				Authentication: conf.Authentication,
 			})
 		}
 	}
