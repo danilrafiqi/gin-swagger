@@ -10,6 +10,7 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
+	"github.com/swaggo/swag"
 )
 
 type Config struct {
@@ -98,19 +99,35 @@ func index(conf Config) gin.HandlerFunc {
 				Authentication: conf.Authentication,
 			})
 		} else {
+			doc, _ := swag.ReadDoc()
+			var url string
+			if doc == "" {
+				url = conf.Url + "/docs/swagger.json"
+			} else {
+				url = conf.Url + "/docs.json"
+			}
+
 			index.Execute(c.Writer, swaggerUIBundle{
-				URL:            conf.Url + "/docs/swagger.json",
+				URL:            url,
 				Authentication: conf.Authentication,
 			})
 		}
 	}
 }
 
+func docToJson(conf Config) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		doc, _ := swag.ReadDoc()
+		c.Writer.Write([]byte(doc))
+	}
+}
+
 func Init(config Config) {
 	var store = cookie.NewStore([]byte("secret"))
+	config.Route.Use(sessions.Sessions("mysession", store))
 	config.Route.Static("/assets", "./swagger/assets")
 	config.Route.Static("/docs", "./swagger/docs/")
-	config.Route.Use(sessions.Sessions("mysession", store))
+	config.Route.GET("/docs.json", docToJson(config))
 	config.Route.GET("/login", login(config))
 	config.Route.POST("/login", loginProccess(config))
 	config.Route.GET("/logout", logout(config))
