@@ -52,7 +52,11 @@ func authenticate(conf Config) gin.HandlerFunc {
 func login(conf Config) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var loginPath = path.Join("swagger/views", "login.html")
-		var login, _ = template.ParseFiles(loginPath)
+		var login, err = template.ParseFiles(loginPath)
+		if err != nil {
+			fmt.Println("error bro ", err)
+			panic(err)
+		}
 		login.Execute(c.Writer, swaggerUIBundle{
 			URL: conf.Url,
 		})
